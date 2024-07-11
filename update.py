@@ -4,10 +4,11 @@ from pymongo import MongoClient
 import time
 import pytz
 from datetime import datetime
+from readconfig import connection_string
 
 
 # Connect to MongoDB
-client = MongoClient("CONNECTION-STRING") # Add your connection string here
+client = MongoClient(connection_string)
 db = client.assets # Replace "assets" with your collection name
 
 # Get current time in UTC
@@ -22,7 +23,7 @@ pretty_time = current_time_timezone.strftime("%d. %b. %Y %H:%M %Z")
 
 # Check if the command-line arguments are provided correctly
 if len(sys.argv) != 3:
-    print("Usage: python3 myscript.py /path/to/all-subs.txt org")
+    print(f"Usage: python3 {sys.argv[0]} /path/to/all-subs.txt org")
     sys.exit(1)
 
 # Extract the directory path and organization name from the command-line arguments
