@@ -1,7 +1,5 @@
 import sys
-import pymongo
 from pymongo import MongoClient
-import time
 import pytz
 from datetime import datetime
 from readconfig import connection_string
@@ -156,3 +154,5 @@ def update_503():
 updated_records_count_503 = update_503()
 if updated_records_count_503 > 0:
     print(f"{updated_records_count_503} records with status 503 updated.")
+
+# TODO: update 500

@@ -1,7 +1,5 @@
 import sys
-import pymongo
 from pymongo import MongoClient
-import time
 import pytz
 from datetime import datetime
 from readconfig import connection_string

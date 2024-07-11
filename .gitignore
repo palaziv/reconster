@@ -1,2 +1,5 @@
 mongodb.ini
 __pycache__/
+# include the recon directory but exclude all contents
+/recon/*
+!/recon/

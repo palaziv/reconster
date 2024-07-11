@@ -1,7 +1,8 @@
 #!/bin/bash
 
-baseDir="/root/recon"
-# Pompt user for domain input
+baseDir="$(pwd)/recon"
+
+# Prompt user for domain input
 read -p "Enter root domain: " root_domain
 
 read -p "Enter organization name: " org_name
