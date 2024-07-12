@@ -1,7 +1,6 @@
 #!/bin/bash
 
 baseDir="$(pwd)/recon"
-scriptsDir="${baseDir}/scripts"
 
 if [[ -d "$baseDir" ]]; then
         for dir in "$baseDir"/*/; do
@@ -31,10 +30,10 @@ if [[ -d "$baseDir" ]]; then
                         cat "${dir}/metadata.tmp" | grep '\[200\]' | notify -bulk -pc "${dir}/provider-config.yaml"
                         
                         echo "Inserting records into the database..."
-                        python3 "${scriptsDir}/insert.py" "${dir}/all_subs.txt" ${programName}
+                        python3 ./insert.py "${dir}/all_subs.txt" ${programName}
 
                         echo "Updating status codes..."
-                        python3 "${scriptsDir}/update.py" "${dir}" ${programName}
+                        python3 ./update.py "${dir}" ${programName}
                 else
                         echo "No root domains found for $programName!"
                 fi
