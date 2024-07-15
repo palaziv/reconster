@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: refactor this to use recon() in stage2.sh
+
 baseDir="$(pwd)/recon"
 
 if [[ -d "$baseDir" ]]; then

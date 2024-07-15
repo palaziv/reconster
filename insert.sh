@@ -36,5 +36,25 @@ cat "$dir/resolved_with_ips.txt" | bbrf domain update - -p $programName -s dnsx
 
 echo "BBRF: adding URLs..."
 # add urls with status code and content length
-cat "$dir/metadata.txt" | awk '{print $1" "$2" "$4}' | tr -d '[]' | bbrf url add - -p $programName -s httpx
+#cat "$dir/metadata.txt" | awk '{print $1" "$2" "$4}' | tr -d '[]' | bbrf url add - -p $programName -s httpx
 
+while IFS= read -r line; do
+    # Use jq to extract the necessary fields
+    url=$(echo "$line" | jq -r '.url')
+    status_code=$(echo "$line" | jq -r '.status_code')
+    content_length=$(echo "$line" | jq -r '.content_length')
+    title=$(echo "$line" | jq -r '.title')
+    location=$(echo "$line" | jq -r '.location')
+    webserver=$(echo "$line" | jq -r 'if .webserver then .webserver else "" end')
+    tech_list=$(echo "$line" | jq -r 'if .tech then .tech else [] end')
+  
+    # construct the bbrf command with the extracted fields
+    cmd="bbrf url add \"$url\" \"$status_code\" \"$content_length\" -t title:\"$title\" -t location:\"$location\" -t webserver:\"$webserver\""
+
+    # Add a tag for each technology
+    for tech in $(echo "$tech_list" | jq -r '.[]'); do
+        cmd="$cmd -t tech:\"$tech\""
+    done
+
+    eval $cmd
+done < $dir/metadata.txt

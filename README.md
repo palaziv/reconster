@@ -36,7 +36,3 @@ discord:
 - Check out my medium article series on this tool:<br>
 <a href="https://medium.com/@aliraah/how-do-i-automate-my-recon-part-one-fd17dc8717c8">How do I automate my recon — Part One </a><br>
 <a href="https://medium.com/@aliraah/how-do-i-automate-my-recon-part-two-b39a66b4c23d">How do I automate my recon — Part Two </a>
-
-
-TODO: create an index on "subdomain" field:
-python3 -c "import pymongo; client = MongoClient(<connection_string>); db = client.assets; collection = db[<collection_name>]; collection.create_index([("subdomain", pymongo.ASCENDING)], unique=True)

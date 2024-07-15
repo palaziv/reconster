@@ -16,7 +16,11 @@ recon() {
 
         echo "Gathering http metadata..."
         # probe both http and https with "-no-fallback"
-        httpx -silent -l "${dir}/resolved.txt" -no-fallback -ports 80,443,4000,4443,4080,8000,8080,8443,8888,9090 -sc -cl -title -ct -location -server -td -nc | anew -q "${dir}/metadata.txt"
+        httpx -silent -l "${dir}/resolved.txt" -no-fallback -ports 80,443,4000,4443,4080,8000,8080,8443,8888,9090 -sc -cl -title -ct -location -server -td -nc -j | anew -q "${dir}/metadata.txt"
+
+        # TODO: gowitness
+        # TODO: dorking (https://github.com/xnl-h4ck3r/xnldorker/tree/main)
+        # TODO: waymore + katana
 
         echo "Adding to BBRF..."
         ./insert.sh $dir
