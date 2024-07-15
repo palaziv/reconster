@@ -12,15 +12,15 @@ else
     bbrf new $programName
 
     read -p "Enter inscope domains/IPs (separated by spaces; note that this is required): " inscope
-    if [ -z "$inscope" ]; then
+    if [ -n "$inscope" ]; then
         bbrf inscope add $inscope -p $programName
     else
         echo "No inscope specified. Exiting ..."
         exit 1
     fi
 
-    read -p "Enter outscope domains/IPs (separated by spaces): " outscope
-    if [ -z "$outscope" ]; then
+    read -p "Enter outscope domains/IPs (separated by spaces; can be empty): " outscope
+    if [ -n "$outscope" ]; then
         bbrf outscope add $outscope -p $programName
     fi
 fi
@@ -49,7 +49,7 @@ while IFS= read -r line; do
     tech_list=$(echo "$line" | jq -r 'if .tech then .tech else [] end')
   
     # construct the bbrf command with the extracted fields
-    cmd="bbrf url add \"$url\" \"$status_code\" \"$content_length\" -t title:\"$title\" -t location:\"$location\" -t webserver:\"$webserver\""
+    cmd="bbrf url add '$url $status_code $content_length' -s httpx -t title:\"$title\" -t location:\"$location\" -t webserver:\"$webserver\""
 
     # Add a tag for each technology
     for tech in $(echo "$tech_list" | jq -r '.[]'); do
@@ -57,4 +57,4 @@ while IFS= read -r line; do
     done
 
     eval $cmd
-done < $dir/metadata.txt
+done < "$dir/metadata.txt"
