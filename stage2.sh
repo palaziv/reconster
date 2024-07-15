@@ -8,15 +8,20 @@ recon() {
         subfinder -dL "${dir}/rootdomain.txt" -all -silent | anew -q "${dir}/all_subs.txt"
 
         echo "Resolving found subdomains..."
-        # noerror subdomain enumeration, see https://www.securesystems.de/blog/enhancing-subdomain-enumeration-ents-and-noerror/
-        dnsx -l "${dir}/all_subs.txt" -silent -rcode noerror | anew -q "${dir}/resolved.txt"
+        # Run dnsx and store output in a temporary file
+        dnsx -l "${dir}/all_subs.txt" -silent -a -resp -nc | tr -d '[]' > "${dir}/dnsx.tmp"
+        awk '{print $1}' "${dir}/dnsx.tmp" | anew -q "${dir}/resolved.txt"
+        awk '{print $1":"$3}' "${dir}/dnsx.tmp" | anew -q "${dir}/resolved_with_ips.txt"
+        rm "${dir}/dnsx.tmp"
 
         echo "Gathering http metadata..."
         # probe both http and https with "-no-fallback"
+        # TODO: check if we can use -q with anew or if the output is necessary
         httpx -l "${dir}/resolved.txt" -no-fallback -ports 80,443,4000,4443,4080,8000,8080,8443,8888,9090 -sc -title -ct -location -server -td -method -ip -cname -cdn | anew "${dir}/metadata.txt"
 
         echo "Separating subs by status code..."
         # Using sed to remove the color output in metadata file so grep doesn't freak out later on
+        # TODO: why not use -nc switch to simply disable colored output? :D
         sed 's/\x1B\[[0-9;]*[JKmsu]//g' "${dir}/metadata.txt" > "${dir}/metadata.tmp"
         grep '\[200\]' "${dir}/metadata.tmp" | cut -d " " -f 1 | cut -d "/" -f 3 > "${dir}/200.txt"
         grep '\[301\]' "${dir}/metadata.tmp" | cut -d " " -f 1 | cut -d "/" -f 3 > "${dir}/301.txt"
@@ -27,6 +32,8 @@ recon() {
         grep '\[500\]' "${dir}/metadata.tmp" | cut -d " " -f 1 | cut -d "/" -f 3 > "${dir}/500.txt"
         grep '\[502\]' "${dir}/metadata.tmp" | cut -d " " -f 1 | cut -d "/" -f 3 > "${dir}/502.txt"
         grep '\[503\]' "${dir}/metadata.tmp" | cut -d " " -f 1 | cut -d "/" -f 3 > "${dir}/503.txt"
+
+        # TODO: remove metadata.tmp
 
         echo "Inserting records into the database..."
         programName=$(basename "$dir")
