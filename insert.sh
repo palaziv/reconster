@@ -27,16 +27,15 @@ fi
 
 echo "BBRF: adding subdomains..."
 # first add all found subdomains even unresolved ones
-cat "$dir/all_subs.txt" | bbrf domain add - -p $programName -s subfinder
+cat "$dir/all_subs.txt" | bbrf domain add - -p $programName -s subfinder -t added:$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 # now add/update resolved domains with their ips
-cat "$dir/resolved_with_ips.txt" | bbrf domain add - -p $programName -s dnsx
-# add does not work when the domain already exists, so do an update
-cat "$dir/resolved_with_ips.txt" | bbrf domain update - -p $programName -s dnsx
+# if the domain already exists => update and add will fail, if not update will fail but add will succeed
+cat "$dir/resolved_with_ips.txt" | bbrf domain update - -p $programName -s dnsx -t modified:$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+cat "$dir/resolved_with_ips.txt" | bbrf domain add - -p $programName -s dnsx -t added:$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 echo "BBRF: adding URLs..."
 # add urls with status code and content length
-#cat "$dir/metadata.txt" | awk '{print $1" "$2" "$4}' | tr -d '[]' | bbrf url add - -p $programName -s httpx
 
 while IFS= read -r line; do
     # Use jq to extract the necessary fields
@@ -49,7 +48,9 @@ while IFS= read -r line; do
     tech_list=$(echo "$line" | jq -r 'if .tech then .tech else [] end')
   
     # construct the bbrf command with the extracted fields
-    cmd="bbrf url add '$url $status_code $content_length' -s httpx -t title:\"$title\" -t location:\"$location\" -t webserver:\"$webserver\""
+    added=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+    # TODO: if url already exists update it instead => update does not exist for urls yet; add  (see https://github.com/honoki/bbrf-client/issues/83)
+    cmd="bbrf url add '$url $status_code $content_length' -p \"$programName\" -s httpx -t added:\"$added\" -t title:\"$title\" -t location:\"$location\" -t webserver:\"$webserver\""
 
     # Add a tag for each technology
     for tech in $(echo "$tech_list" | jq -r '.[]'); do

@@ -4,3 +4,4 @@ __pycache__/
 /recon/*
 !/recon/
 resume.cfg
+*.sqlite3
