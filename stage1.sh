@@ -6,6 +6,8 @@ read -p "Enter organization name: " org_name
 
 read -p "Enter root domains (separated by spaces): " root_domains
 
+read -p "Enter screenshots path: " screenshots_dir
+
 if [ ! -d "${baseDir}/${org_name}" ]; then
         mkdir ${baseDir}/${org_name}
         echo "Created directory: '$org_name'"
@@ -17,4 +19,4 @@ else
         echo "Finding subdomains..."
 fi
 
-./stage2.sh "${baseDir}/${org_name}" $org_name
+./stage2.sh "${baseDir}/${org_name}" $org_name $screenshots_dir

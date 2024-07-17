@@ -3,6 +3,7 @@
 recon() {
         dir=$1
         programName=$2
+        screenshots_dir=$3
 
         echo "Gathering subdomains for $programName..."
         subfinder -dL "${dir}/rootdomain.txt" -all -silent | anew -q "${dir}/all_subs.txt"
@@ -19,7 +20,8 @@ recon() {
         httpx -silent -l "${dir}/resolved.txt" -no-fallback -ports 80,443,4000,4443,4080,8000,8080,8443,8888,9090 -j | anew -q "${dir}/metadata.txt"
 
         # TODO: gowitness
-        cat "$dir/metadata.txt" | jq -r '.url' | gowitness file -f - --screenshot-path "${dir}/screenshots"
+
+        cat "$dir/metadata.txt" | jq -r '.url' | gowitness file -f - -D "sqlite://$PWD/gowitness.sqlite3" --screenshot-path "${screenshots_dir}"
 
         # TODO: dorking (https://github.com/xnl-h4ck3r/xnldorker/tree/main)
         # TODO: waymore + katana
@@ -28,12 +30,13 @@ recon() {
         ./insert.sh $dir
 }
 
-if [ "$#" -ne 2 ]; then
-        echo "Usage: $0 /path/to/directory program/organization name"
+if [ "$#" -ne 3 ]; then
+        echo "Usage: $0 /path/to/directory program/organization name /path/where/screenshots/are/saved"
         exit 1
 fi
 
 dir=$1
 programName=$2
+screenshots_dir=$3
 
-recon $dir $programName
+recon $dir $programName $screenshots_dir

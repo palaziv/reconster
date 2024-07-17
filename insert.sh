@@ -11,7 +11,7 @@ else
     echo "BBRF: program not found. Creating one using 'bbrf new $programName'..."
     bbrf new $programName
 
-    read -p "Enter inscope domains/IPs (separated by spaces; note that this is required): " inscope
+    read -p "Enter inscope domains/IPs (separated by spaces; required): " inscope
     if [ -n "$inscope" ]; then
         bbrf inscope add $inscope -p $programName
     else
@@ -19,7 +19,7 @@ else
         exit 1
     fi
 
-    read -p "Enter outscope domains/IPs (separated by spaces; can be empty): " outscope
+    read -p "Enter outscope domains/IPs (separated by spaces; optional): " outscope
     if [ -n "$outscope" ]; then
         bbrf outscope add $outscope -p $programName
     fi
@@ -35,7 +35,6 @@ cat "$dir/resolved_with_ips.txt" | bbrf domain update - -p $programName -s dnsx 
 cat "$dir/resolved_with_ips.txt" | bbrf domain add - -p $programName -s dnsx -t added:$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
 echo "BBRF: adding URLs..."
-# add urls with status code and content length
 
 while IFS= read -r line; do
     # Use jq to extract the necessary fields
@@ -46,11 +45,14 @@ while IFS= read -r line; do
     location=$(echo "$line" | jq -r '.location')
     webserver=$(echo "$line" | jq -r 'if .webserver then .webserver else "" end')
     tech_list=$(echo "$line" | jq -r 'if .tech then .tech else [] end')
+
+    # get name of gowitness screenshot
+    screenshot_name=$(sqlite3 gowitness.sqlite3 "select filename from urls where url='$url'")
   
     # construct the bbrf command with the extracted fields
     added=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-    # TODO: if url already exists update it instead => update does not exist for urls yet; add  (see https://github.com/honoki/bbrf-client/issues/83)
-    cmd="bbrf url add '$url $status_code $content_length' -p \"$programName\" -s httpx -t added:\"$added\" -t title:\"$title\" -t location:\"$location\" -t webserver:\"$webserver\""
+    # update does not exist for urls yet; see https://github.com/honoki/bbrf-client/issues/83
+    cmd="bbrf url add '$url $status_code $content_length' -p \"$programName\" -s httpx -t added:\"$added\" -t title:\"$title\" -t location:\"$location\" -t webserver:\"$webserver\" -t screenshot:\"$screenshot_name\""
 
     # Add a tag for each technology
     for tech in $(echo "$tech_list" | jq -r '.[]'); do
