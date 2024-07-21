@@ -45,14 +45,13 @@ while IFS= read -r line; do
     location=$(echo "$line" | jq -r '.location')
     webserver=$(echo "$line" | jq -r 'if .webserver then .webserver else "" end')
     tech_list=$(echo "$line" | jq -r 'if .tech then .tech else [] end')
-
-    # get name of gowitness screenshot
-    screenshot_name=$(sqlite3 gowitness.sqlite3 "select filename from urls where url='$url'")
+    favicon_hash=$(echo "$line" | jq -r '.favicon')
+    screenshot_name=$(echo "$line" | jq -r 'if .screenshot_path_rel then .screenshot_path_rel else "" end')
   
     # construct the bbrf command with the extracted fields
     added=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     # update does not exist for urls yet; see https://github.com/honoki/bbrf-client/issues/83
-    cmd="bbrf url add '$url $status_code $content_length' -p \"$programName\" -s httpx -t added:\"$added\" -t title:\"$title\" -t location:\"$location\" -t webserver:\"$webserver\" -t screenshot:\"$screenshot_name\""
+    cmd="bbrf url add '$url $status_code $content_length' -p \"$programName\" -s httpx -t added:\"$added\" -t title:\"$title\" -t location:\"$location\" -t webserver:\"$webserver\" -t favicon:\"$favicon_hash\" -t screenshot:\"$screenshot_name\""
 
     # Add a tag for each technology
     for tech in $(echo "$tech_list" | jq -r '.[]'); do
